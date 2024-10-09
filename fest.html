@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festinbjudan - Efter Tentamen</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; background-color: #fdf5e6; padding: 20px; }
+        #container { max-width: 800px; margin: auto; background: #ffefd5; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        #languageToggle { text-align: right; margin-bottom: 20px; }
+        .hidden { display: none; }
+        button { padding: 10px; font-size: 16px; cursor: pointer; background-color: #ff6347; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #ff4500; }
+        .quiz-question { margin-bottom: 20px; }
+        .quiz-container { margin-top: 20px; }
+        .result { font-weight: bold; margin-top: 20px; }
+    </style>
+    <script>
+        let currentLanguage = 'sv';
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'sv' ? 'en' : 'sv';
+            document.getElementById('svContent').classList.toggle('hidden');
+            document.getElementById('enContent').classList.toggle('hidden');
+        }
+
+        function startQuiz() {
+            const questions = currentLanguage === 'sv' ? getSwedishQuestions() : getEnglishQuestions();
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = '';
+            let correctAnswers = 0;
+            let results = [];
+
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'quiz-question';
+                questionDiv.innerHTML = `<label for="question${index}">${q.question}</label><br>
+                    <input type="text" id="question${index}" data-answer="${q.answer}">`;
+                quizContainer.appendChild(questionDiv);
+            });
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = currentLanguage === 'sv' ? 'Skicka in svar' : 'Submit Answers';
+            submitButton.onclick = function() {
+                questions.forEach((q, index) => {
+                    const userAnswer = document.getElementById(`question${index}`).value;
+                    const correctAnswer = q.answer.toLowerCase().replace(/\s+/g, '');
+                    const userAnswerNormalized = userAnswer.toLowerCase().replace(/\s+/g, '');
+                    if (userAnswerNormalized === correctAnswer || areAnswersEquivalent(userAnswerNormalized, correctAnswer)) {
+                        correctAnswers++;
+                        results.push({ question: q.question, userAnswer: userAnswer, correct: true });
+                    } else {
+                        results.push({ question: q.question, userAnswer: userAnswer, correct: false, correctAnswer: q.answer });
+                    }
+                });
+
+                let resultMessage = '';
+                results.forEach(result => {
+                    resultMessage += `Fråga: ${result.question}<br>`;
+                    resultMessage += `Ditt svar: ${result.userAnswer || 'Inget svar'}<br>`;
+                    if (result.correct) {
+                        resultMessage += 'Rätt!<br><br>';
+                    } else {
+                        resultMessage += `Fel. Rätt svar: ${result.correctAnswer}<br><br>`;
+                    }
+                });
+
+                const scoreMessage = currentLanguage === 'sv' ? `Du fick ${correctAnswers} av ${questions.length} rätt.` : `You got ${correctAnswers} out of ${questions.length} correct.`;
+                resultMessage += `<span class="result">${scoreMessage}</span>`;
+
+                if (correctAnswers === questions.length) {
+                    resultMessage += `<br><br>${currentLanguage === 'sv' ? 'Grattis! Du är inbjuden till festen!' : 'Congratulations! You are invited to the party!'}`;
+                } else {
+                    resultMessage += `<br><br>${currentLanguage === 'sv' ? 'Tyvärr, du hade inte alla rätt. Försök igen!' : 'Sorry, you did not get everything correct. Try again!'}`;
+                }
+
+                quizContainer.innerHTML = resultMessage;
+            };
+            quizContainer.appendChild(submitButton);
+        }
+
+        function areAnswersEquivalent(userAnswer, correctAnswer) {
+            const equivalenceMap = {
+                '5kg': '5000g',
+                '5000g': '5kg',
+                'lagenvårdavmissbrukare': 'lvm',
+                'lvm': 'lagenvårdavmissbrukare',
+                'lagenomvårdavmissbrukare': 'lagomvårdavmissbrukare',
+                'lagomvårdavmissbrukare': 'lagenomvårdavmissbrukare',
+                'polislagen': 'polislag',
+                'polislag': 'polislagen',
+                'polismyndigheten': 'polisen',
+                'polisen': 'polismyndigheten'
+            };
+            return equivalenceMap[userAnswer] === correctAnswer;
+        }
+
+        function getSwedishQuestions() {
+            return [
+                { question: 'Vilken lag behandlar ingripande av polisen för att förhindra brott?', answer: 'polislag' },
+                { question: 'Vad är lägsta mängden cannabis för grovt brott?', answer: '5 kg' },
+                { question: 'Vilken myndighet ansvarar för att utfärda pass i Sverige?', answer: 'polisen' },
+                { question: 'Vilken lag används för att skydda barn i riskzonen?', answer: 'LVU' },
+                { question: 'Vad betyder LVM?', answer: 'lagen om vård av missbrukare' }
+            ];
+        }
+
+        function getEnglishQuestions() {
+            return [
+                { question: 'Which law governs police interventions to prevent crimes?', answer: 'police act' },
+                { question: 'What is the minimum amount of cannabis for a serious crime?', answer: '5 kg' },
+                { question: 'What is the purpose of LPT?', answer: 'compulsory care' },
+                { question: 'Which law is used to protect children at risk?', answer: 'LVU' },
+                { question: 'What does LVM stand for?', answer: 'care of addicts act' }
+            ];
+        }
+    </script>
+</head>
+<body>
+    <div id="container">
+        <div id="languageToggle">
+            <button onclick="toggleLanguage()">Switch Language</button>
+        </div>
+        <div id="svContent">
+            <h1>Festinbjudan - Efter Tentamen</h1>
+            <p>Vi anordnar en fest för våra klasskamrater för att fira att vi klarade eller bommade tentan! Förbered dig på en rolig natt fylld med drycker och bra stämning.</p>
+            <p><strong>När:</strong> Lördag kväll den 12 oktober 2024</p>
+            <p><strong>Var:</strong> Robins lägenhet</p>
+            <p><strong>Ta med:</strong> Dryck och ett glatt humör!</p>
+            <button onclick="startQuiz()">Ta quizet för att bli inbjuden!</button>
+            <div id="quizContainer" class="quiz-container"></div>
+        </div>
+        <div id="enContent" class="hidden">
+            <h1>Party Invitation - After the Exam</h1>
+            <p>We are organizing a party for our classmates to celebrate whether we passed or failed the exam! Get ready for a fun night filled with drinks and good vibes.</p>
+            <p><strong>When:</strong> Saturday evening, October 12, 2024</p>
+            <p><strong>Where:</strong> Robin's apartment</p>
+            <p><strong>Bring:</strong> Drinks and a good mood!</p>
+            <button onclick="startQuiz()">Take the quiz to get invited!</button>
+            <div id="quizContainer" class="quiz-container"></div>
+        </div>
+    </div>
+</body>
+</html>
